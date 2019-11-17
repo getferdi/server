@@ -14,6 +14,9 @@ database/adonis.sqlite
 # Uploaded recipes
 recipes/
 
+# docker-compose data directory
+/data/
+
 .DS_Store
 public/terms.html
 public/privacy.html

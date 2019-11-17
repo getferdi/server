@@ -1,0 +1,14 @@
+---
+version: "2"
+services:
+  ferdi-server:
+    build:
+      context: .
+    container_name: ferdi-server
+    environment:
+      - CONNECT_WITH_FRANZ=false
+    volumes:
+      - ./data/database:/database
+      - ./data/recipes:/app/recipes
+    ports:
+      - 8080:8080

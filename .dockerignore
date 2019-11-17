@@ -1,0 +1,9 @@
+/.git
+/.gitattributes
+/.gitignore
+/.editorconfig
+
+/data/
+/node_modules/
+
+*.md

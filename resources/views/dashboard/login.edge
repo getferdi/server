@@ -1,4 +1,4 @@
-@layout('layouts.v2')
+@layout('layouts/v2')
 
 @section('content')
 <div class="w-screen h-screen bg-purple-200 flex items-center justify-center">
@@ -8,20 +8,14 @@
       Login
     </h1>
 
-    @if(flashMessage('error'))
+    @if(flashMessages.has('error'))
     <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4">
-      {{ flashMessage('error') }}
+      {{ flashMessages.get('error') }}
     </div>
     @endif
-    @if(old('message'))
-    <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4">
-      {{ old('message') }}
-    </div>
-    @endif
-
     {{ csrfField() }}
     <div class="mb-4">
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="mail">
         E-Mail
       </label>
       <input
@@ -30,7 +24,6 @@
         name="mail"
         type="text"
         placeholder="E-Mail"
-        value="{{ old('mail', '') }}"
         required>
     </div>
     <div class="mb-6">

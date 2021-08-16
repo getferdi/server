@@ -1,11 +1,11 @@
-@layout('layouts.v2')
+@layout('layouts/v2')
 
 @section('content')
 <div class="leading-normal tracking-normal text-gray-900" style="font-family: 'Source Sans Pro', sans-serif;">
 
   <div class="h-screen bg-right bg-cover">
     <div class="flex justify-center">
-      <img class="h-20 my-10" src="{{ assetsUrl('img/icon.png') }}">
+      <img class="h-20 my-10" src="/img/icon.png" alt="icon">
     </div>
     <!--Main-->
     <div class="container px-6 mx-auto flex flex-wrap flex-col md:flex-row items-center">
@@ -52,7 +52,7 @@
 
       <!--Right Col-->
       <div class="w-full xl:w-3/5 py-6 overflow-y-hidden">
-        <img class="w-5/6 mx-auto lg:mr-0 slide-in-bottom" src="{{ assetsUrl('img/hero.png') }}">
+        <img class="w-5/6 mx-auto lg:mr-0 slide-in-bottom" src="/img/hero.png" alt="logo">
       </div>
 
       <!--Footer-->
@@ -67,13 +67,13 @@
     <script>
       // Get server URL for current location
       let server = location.href.replace('/index.html', '');
-      if (server[server.length - 1] == '/') {
-        server = server.substr(0, server.length - 1)
+      if (server[server.length - 1] === '/') {
+        server = server.substr(0, server.length - 1);
       }
-    
+
       // Show on page
       document.getElementById('server').innerText = server;
-    
+
     </script>
 
   </div>

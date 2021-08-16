@@ -1,0 +1,28 @@
+{
+  "root": true,
+  "env": {
+    "commonjs": true,
+    "es6": true,
+    "node": true
+  },
+  "plugins": [
+    "adonis"
+  ],
+  "extends": [
+    "plugin:adonis/typescriptApp",
+    "plugin:prettier/recommended"
+  ],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly",
+    "use": "readonly",
+    "window": "readonly",
+    "document": "readonly",
+    "ENV": "readonly",
+    "session": "readonly",
+    "response": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018
+  }
+}

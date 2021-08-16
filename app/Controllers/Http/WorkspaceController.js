@@ -1,7 +1,7 @@
-const Workspace = use('App/Models/Workspace');
-const { validateAll } = use('Validator');
+const Workspace = use("App/Models/Workspace");
+const { validateAll } = use("Validator");
 
-const { v4: uuid } = require('uuid');
+const { v4: uuid } = require("uuid");
 
 class WorkspaceController {
   // Create a new workspace for user
@@ -9,16 +9,16 @@ class WorkspaceController {
     try {
       await auth.getUser();
     } catch (error) {
-      return response.send('Missing or invalid api token');
+      return response.send("Missing or invalid api token");
     }
 
     // Validate user input
     const validation = await validateAll(request.all(), {
-      name: 'required',
+      name: "required",
     });
     if (validation.fails()) {
       return response.status(401).send({
-        message: 'Invalid POST arguments',
+        message: "Invalid POST arguments",
         messages: validation.messages(),
         status: 401,
       });
@@ -30,10 +30,7 @@ class WorkspaceController {
     let workspaceId;
     do {
       workspaceId = uuid();
-    } while (
-      (await Workspace.query().where('workspaceId', workspaceId).fetch()).rows
-        .length > 0
-    ); // eslint-disable-line no-await-in-loop
+    } while ((await Workspace.query().where("workspaceId", workspaceId).fetch()).rows.length > 0); // eslint-disable-line no-await-in-loop
 
     const order = (await auth.user.workspaces().fetch()).rows.length;
 
@@ -59,17 +56,17 @@ class WorkspaceController {
     try {
       await auth.getUser();
     } catch (error) {
-      return response.send('Missing or invalid api token');
+      return response.send("Missing or invalid api token");
     }
 
     // Validate user input
     const validation = await validateAll(request.all(), {
-      name: 'required',
-      services: 'required|array',
+      name: "required",
+      services: "required|array",
     });
     if (validation.fails()) {
       return response.status(401).send({
-        message: 'Invalid POST arguments',
+        message: "Invalid POST arguments",
         messages: validation.messages(),
         status: 401,
       });
@@ -80,8 +77,8 @@ class WorkspaceController {
 
     // Update data in database
     await Workspace.query()
-      .where('workspaceId', id)
-      .where('userId', auth.user.id)
+      .where("workspaceId", id)
+      .where("userId", auth.user.id)
       .update({
         name: data.name,
         services: JSON.stringify(data.services),
@@ -89,10 +86,7 @@ class WorkspaceController {
 
     // Get updated row
     const workspace = (
-      await Workspace.query()
-        .where('workspaceId', id)
-        .where('userId', auth.user.id)
-        .fetch()
+      await Workspace.query().where("workspaceId", id).where("userId", auth.user.id).fetch()
     ).rows[0];
 
     return response.send({
@@ -114,16 +108,16 @@ class WorkspaceController {
     try {
       await auth.getUser();
     } catch (error) {
-      return response.send('Missing or invalid api token');
+      return response.send("Missing or invalid api token");
     }
 
     // Validate user input
     const validation = await validateAll(params, {
-      id: 'required',
+      id: "required",
     });
     if (validation.fails()) {
       return response.status(401).send({
-        message: 'Invalid arguments',
+        message: "Invalid arguments",
         messages: validation.messages(),
         status: 401,
       });
@@ -132,13 +126,10 @@ class WorkspaceController {
     const { id } = params;
 
     // Update data in database
-    await Workspace.query()
-      .where('workspaceId', id)
-      .where('userId', auth.user.id)
-      .delete();
+    await Workspace.query().where("workspaceId", id).where("userId", auth.user.id).delete();
 
     return response.send({
-      message: 'Successfully deleted workspace',
+      message: "Successfully deleted workspace",
     });
   }
 
@@ -147,19 +138,19 @@ class WorkspaceController {
     try {
       await auth.getUser();
     } catch (error) {
-      return response.send('Missing or invalid api token');
+      return response.send("Missing or invalid api token");
     }
 
     const workspaces = (await auth.user.workspaces().fetch()).rows;
     // Convert to array with all data Franz wants
     let workspacesArray = [];
     if (workspaces) {
-      workspacesArray = workspaces.map(workspace => ({
+      workspacesArray = workspaces.map((workspace) => ({
         id: workspace.workspaceId,
         name: workspace.name,
         order: workspace.order,
         services:
-          typeof workspace.services === 'string'
+          typeof workspace.services === "string"
             ? JSON.parse(workspace.services)
             : workspace.services,
         userId: auth.user.id,

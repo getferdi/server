@@ -1,0 +1,44 @@
+{
+  "extends": "./node_modules/adonis-preset-ts/tsconfig",
+  "compilerOptions": {
+    "allowJs": true,
+    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    "paths": {
+      "App/*": [
+        "./app/*"
+      ],
+      "Config/*": [
+        "./config/*"
+      ],
+      "Contracts/*": [
+        "./contracts/*"
+      ],
+      "Database/*": [
+        "./database/*"
+      ]
+    },
+    "types": [
+      "@adonisjs/core",
+      "@adonisjs/repl",
+      "@adonisjs/session",
+      "@adonisjs/view",
+      "@adonisjs/lucid",
+      "@adonisjs/mail",
+      "@adonisjs/auth",
+      "@adonisjs/shield",
+      "@adonisjs/validator"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "officialrecipes",
+    "docs",
+    "public"
+  ]
+}

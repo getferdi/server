@@ -1,9 +1,9 @@
 /* eslint-env browser */
-const submitBtn = document.getElementById('submit');
-const fileInput = document.getElementById('file');
-const fileOutput = document.getElementById('fileoutput');
+const submitBtn = document.getElementById("submit");
+const fileInput = document.getElementById("file");
+const fileOutput = document.getElementById("fileoutput");
 
-fileInput.addEventListener('change', () => {
+fileInput.addEventListener("change", () => {
   const reader = new FileReader();
   reader.onload = function () {
     const text = reader.result;

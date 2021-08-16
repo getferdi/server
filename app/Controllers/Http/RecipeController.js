@@ -1,70 +1,67 @@
-const Recipe = use('App/Models/Recipe');
-const Helpers = use('Helpers');
-const Drive = use('Drive');
-const {
-  validateAll,
-} = use('Validator');
-const Env = use('Env');
+const Recipe = use("App/Models/Recipe");
+const Helpers = use("Helpers");
+const Drive = use("Drive");
+const { validateAll } = use("Validator");
+const Env = use("Env");
 
-const fetch = require('node-fetch');
-const targz = require('targz');
-const path = require('path');
-const fs = require('fs-extra');
+const fetch = require("node-fetch");
+const targz = require("targz");
+const path = require("path");
+const fs = require("fs-extra");
 
-const compress = (src, dest) => new Promise((resolve, reject) => {
-  targz.compress({
-    src,
-    dest,
-  }, (err) => {
-    if (err) {
-      reject(err);
-    } else {
-      resolve(dest);
-    }
+const compress = (src, dest) =>
+  new Promise((resolve, reject) => {
+    targz.compress(
+      {
+        src,
+        dest,
+      },
+      (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(dest);
+        }
+      },
+    );
   });
-});
 
 class RecipeController {
   // List official and custom recipes
-  async list({
-    response,
-  }) {
-    const officialRecipes = JSON.parse(await (await fetch('https://api.franzinfra.com/v1/recipes')).text());
+  async list({ response }) {
+    const officialRecipes = JSON.parse(
+      await (await fetch("https://api.franzinfra.com/v1/recipes")).text(),
+    );
     const customRecipesArray = (await Recipe.all()).rows;
     const customRecipes = customRecipesArray.map((recipe) => ({
       id: recipe.recipeId,
       name: recipe.name,
-      ...typeof recipe.data === 'string' ? JSON.parse(recipe.data) : recipe.data,
+      ...(typeof recipe.data === "string" ? JSON.parse(recipe.data) : recipe.data),
     }));
 
-    const recipes = [
-      ...officialRecipes,
-      ...customRecipes,
-    ];
+    const recipes = [...officialRecipes, ...customRecipes];
 
     return response.send(recipes);
   }
 
   // Create a new recipe using the new.html page
-  async create({
-    request,
-    response,
-  }) {
+  async create({ request, response }) {
     // Check if recipe creation is enabled
-    if (Env.get('IS_CREATION_ENABLED') == 'false') { // eslint-disable-line eqeqeq
-      return response.send('This server doesn\'t allow the creation of new recipes.');
+    if (Env.get("IS_CREATION_ENABLED") === "false") {
+      // eslint-disable-line eqeqeq
+      return response.send("This server doesn't allow the creation of new recipes.");
     }
 
     // Validate user input
     const validation = await validateAll(request.all(), {
-      name: 'required|string',
-      id: 'required|unique:recipes,recipeId',
-      author: 'required|accepted',
-      svg: 'required|url',
+      name: "required|string",
+      id: "required|unique:recipes,recipeId",
+      author: "required|accepted",
+      svg: "required|url",
     });
     if (validation.fails()) {
       return response.status(401).send({
-        message: 'Invalid POST arguments',
+        message: "Invalid POST arguments",
         messages: validation.messages(),
         status: 401,
       });
@@ -73,7 +70,7 @@ class RecipeController {
     const data = request.all();
 
     if (!data.id) {
-      return response.send('Please provide an ID');
+      return response.send("Please provide an ID");
     }
 
     // Check for invalid characters
@@ -82,20 +79,17 @@ class RecipeController {
     }
 
     // Clear temporary recipe folder
-    await fs.emptyDir(Helpers.tmpPath('recipe'));
+    await fs.emptyDir(Helpers.tmpPath("recipe"));
 
     // Move uploaded files to temporary path
-    const files = request.file('files');
-    await files.moveAll(Helpers.tmpPath('recipe'));
+    const files = request.file("files");
+    await files.moveAll(Helpers.tmpPath("recipe"));
 
     // Compress files to .tar.gz file
-    const source = Helpers.tmpPath('recipe');
+    const source = Helpers.tmpPath("recipe");
     const destination = path.join(Helpers.appRoot(), `/recipes/${data.id}.tar.gz`);
 
-    compress(
-      source,
-      destination,
-    );
+    compress(source, destination);
 
     // Create recipe in db
     await Recipe.create({
@@ -104,78 +98,78 @@ class RecipeController {
       data: JSON.stringify({
         author: data.author,
         featured: false,
-        version: '1.0.0',
+        version: "1.0.0",
         icons: {
           svg: data.svg,
         },
       }),
     });
 
-    return response.send('Created new recipe');
+    return response.send("Created new recipe");
   }
 
   // Search official and custom recipes
-  async search({
-    request,
-    response,
-  }) {
+  async search({ request, response }) {
     // Validate user input
     const validation = await validateAll(request.all(), {
-      needle: 'required',
+      needle: "required",
     });
     if (validation.fails()) {
       return response.status(401).send({
-        message: 'Please provide a needle',
+        message: "Please provide a needle",
         messages: validation.messages(),
         status: 401,
       });
     }
 
-    const needle = request.input('needle');
+    const needle = request.input("needle");
 
     // Get results
     let results;
 
-    if (needle === 'ferdi:custom') {
+    if (needle === "ferdi:custom") {
       const dbResults = (await Recipe.all()).toJSON();
       results = dbResults.map((recipe) => ({
         id: recipe.recipeId,
         name: recipe.name,
-        ...typeof recipe.data === 'string' ? JSON.parse(recipe.data) : recipe.data,
+        ...(typeof recipe.data === "string" ? JSON.parse(recipe.data) : recipe.data),
       }));
     } else {
       let remoteResults = [];
-      if (Env.get('CONNECT_WITH_FRANZ') == 'true') { // eslint-disable-line eqeqeq
-        remoteResults = JSON.parse(await (await fetch(`https://api.franzinfra.com/v1/recipes/search?needle=${encodeURIComponent(needle)}`)).text());
+      if (Env.get("CONNECT_WITH_FRANZ") === "true") {
+        // eslint-disable-line eqeqeq
+        remoteResults = JSON.parse(
+          await (
+            await fetch(
+              `https://api.franzinfra.com/v1/recipes/search?needle=${encodeURIComponent(needle)}`,
+            )
+          ).text(),
+        );
       }
-      const localResultsArray = (await Recipe.query().where('name', 'LIKE', `%${needle}%`).fetch()).toJSON();
+      const localResultsArray = (
+        await Recipe.query().where("name", "LIKE", `%${needle}%`).fetch()
+      ).toJSON();
       const localResults = localResultsArray.map((recipe) => ({
         id: recipe.recipeId,
         name: recipe.name,
-        ...typeof recipe.data === 'string' ? JSON.parse(recipe.data) : recipe.data,
+        ...(typeof recipe.data === "string" ? JSON.parse(recipe.data) : recipe.data),
       }));
 
-      results = [
-        ...localResults,
-        ...remoteResults || [],
-      ];
+      results = [...localResults, ...(remoteResults || [])];
     }
 
     return response.send(results);
   }
 
   // Download a recipe
-  async download({
-    response,
-    params,
-  }) {
+  async download({ response, params }) {
     // Validate user input
     const validation = await validateAll(params, {
-      recipe: 'required|accepted',
+      recipe: "required|accepted",
     });
     if (validation.fails()) {
       return response.status(401).send({
-        message: 'Please provide a recipe ID',
+        message: "Please provide a recipe ID",
         messages: validation.messages(),
         status: 401,
       });
@@ -185,19 +179,20 @@ class RecipeController {
 
     // Check for invalid characters
     if (/\.{1,}/.test(service) || /\/{1,}/.test(service)) {
-      return response.send('Invalid recipe name');
+      return response.send("Invalid recipe name");
     }
 
     // Check if recipe exists in recipes folder
     if (await Drive.exists(`${service}.tar.gz`)) {
       return response.send(await Drive.get(`${service}.tar.gz`));
     }
-    if (Env.get('CONNECT_WITH_FRANZ') == 'true') { // eslint-disable-line eqeqeq
+    if (Env.get("CONNECT_WITH_FRANZ") === "true") {
+      // eslint-disable-line eqeqeq
       return response.redirect(`https://api.franzinfra.com/v1/recipes/download/${service}`);
     }
     return response.status(400).send({
-      message: 'Recipe not found',
-      code: 'recipe-not-found',
+      message: "Recipe not found",
+      code: "recipe-not-found",
     });
   }
 }
